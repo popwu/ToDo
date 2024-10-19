@@ -1,27 +1,26 @@
 package config
 
 import (
-	"encoding/json"
 	"os"
 )
 
 type Config struct {
-	ServerAddress string `json:"server_address"`
-	DatabaseURL   string `json:"database_url"`
-	JWTSecret     string `json:"jwt_secret"`
+	ServerAddress string
+	DatabaseURL   string
+	JWTSecret     string
 }
 
 func Load() (*Config, error) {
-	file, err := os.Open("config.json")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+	return &Config{
+		ServerAddress: getEnv("SERVER_ADDRESS", ":8080"),
+		DatabaseURL:   getEnv("DATABASE_URL", "todo.db"),
+		JWTSecret:     getEnv("JWT_SECRET", "your-secret-key"),
+	}, nil
+}
 
-	var cfg Config
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
-		return nil, err
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
 	}
-
-	return &cfg, nil
+	return fallback
 }
